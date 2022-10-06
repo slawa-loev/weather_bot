@@ -8,7 +8,7 @@ from fastapi import FastAPI
 # from datetime import date
 # import sys
 # import requests
-import flask
+from flask import request
 
 app = FastAPI()
 
@@ -18,7 +18,7 @@ app = FastAPI()
 @app.get("/")
 def handle_webhook(request):
 
-    req = flask.request.get_json()
+    req = request.get_json()
 
     tag = req["fulfillmentInfo"]["tag"]
 
