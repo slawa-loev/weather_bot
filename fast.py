@@ -1,6 +1,6 @@
 
 #from xmlrpc.client import DateTime
-from fastapi import FastAPI
+from fastapi import FastAPI, APIRouter, BackgroundTasks
 #import pandas as pd
 #import pytz
 #import datetime as dt
@@ -9,14 +9,19 @@ from fastapi import FastAPI
 # import sys
 # import requests
 from flask import request
+import json
+
+from matplotlib.font_manager import json_load
 
 app = FastAPI()
 
 
-# http://127.0.0.1:8000/predict?pickup_datetime=2012-10-06 12:10:20&pickup_longitude=40.7614327&pickup_latitude=-73.9798156&dropoff_longitude=40.6513111&dropoff_latitude=-73.8803331&passenger_count=2
+APIRouter
 
-@app.get("/")
-def handle_webhook(request):
+# http://127.0.0.1:8000/predict?pickup_datetime=2012-10-06 12:10:20&pickup_longitude=40.7614327&pickup_latitude=-73.9798156&dropoff_longitude=40.6513111&dropoff_latitude=-73.8803331&passenger_count=2
+@app.post("/")
+#@app.get("/")
+def handle_webhook(): # request
 
     req = request.get_json()
 
