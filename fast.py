@@ -9,7 +9,7 @@ from fastapi import FastAPI #, APIRouter, BackgroundTasks
 # import sys
 # import requests
 from flask import Flask, Response, request
-#import json
+import json
 
 #app = FastAPI()
 
@@ -49,8 +49,12 @@ def handle_webhook(): # request
     }
 
     # Returns json
-    return res
+    return Response(json.dumps(res), 200, mimetype='application/json')
+    #return res
 
+### Run a webhook on localhost
+if __name__ == '__main__':
+    app.run(host="0.0.0.0", port=8081, debug=True)
 
 # def root():
 #     return {'greeting': 'Hello'}
