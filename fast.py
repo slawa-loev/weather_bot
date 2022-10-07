@@ -50,7 +50,7 @@ def handle_webhook(): # request
                 {
                     "text": {
                         "text": [
-                            req#text
+                            [req]#text
                         ]
                     }
                 }
@@ -65,30 +65,3 @@ def handle_webhook(): # request
 ### Run a webhook on localhost
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=8081, debug=True)
-
-# def root():
-#     return {'greeting': 'Hello'}
-
-# @app.get("/predict")
-# def predict(pickup_datetime, pickup_longitude, pickup_latitude, dropoff_longitude, dropoff_latitude, passenger_count):
-
-#     utc = pytz.utc
-#     time_loc = utc.localize(pd.to_datetime(pickup_datetime))
-#     fmt="%Y-%m-%d %H:%M:%S UTC"
-#     time_utc=time_loc.strftime(fmt)
-
-
-#     dt.datetime.strptime(pickup_datetime, '%Y-%m-%d %H:%M:%S')
-
-#     X_pred = pd.DataFrame(dict(key=[time_utc],
-#                                pickup_datetime=[time_utc], # format="%Y-%m-%d %H:%M:%S UTC"
-#                                pickup_longitude=float(pickup_longitude),
-#                                pickup_latitude=float(pickup_latitude),
-#                                dropoff_longitude=float(dropoff_longitude),
-#                                dropoff_latitude=float(dropoff_latitude),
-#                                passenger_count=int(passenger_count)
-#                                 ))
-
-
-#     return {"fare_amount" : float(pred(X_pred)[0])}
-#     #return {"fare_amount" : float(app.state.model.predict(X_pred)[0])}
