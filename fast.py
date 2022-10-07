@@ -50,7 +50,7 @@ def handle_webhook(): # request
                 {
                     "text": {
                         "text": [
-                            [req]#text
+                            req['sessionInfo']['parameters']['location']['original']#text
                         ]
                     }
                 }
