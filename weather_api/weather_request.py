@@ -4,6 +4,8 @@ from datetime import date
 import sys
 import requests
 
+#def init_info():
+
 TODAY = str(date.today())
 
 BASE_URI = "https://weather.lewagon.com"
@@ -12,12 +14,18 @@ GEO = "/geo/1.0/direct?"
 
 FORECAST = "/data/2.5/forecast?"
 
-# Handle error messages better
 
-def search_city(query):
-    '''Look for a given city. If multiple options are returned, have the user choose between them.
+#https://weather.lewagon.com/geo/1.0/direct?q=Barcelona
+
+def search_location(query):
+    '''Look for a given location. If multiple options are returned, have the user choose between them.
        Return one city (or None)
     '''
+
+    BASE_URI = "https://weather.lewagon.com"
+
+    GEO = "/geo/1.0/direct?"
+
     query_url = BASE_URI + GEO
 
     params = dict(q=query.capitalize(), limit=5)
@@ -25,37 +33,37 @@ def search_city(query):
     response = requests.get(query_url, params=params).json()
 
 
-    while len(response) == 0:
+    # if len(response) == 0:
 
-        print(f"Sorry, no place with the name '{query.title()}' could be found. Did you spell it correctly?\n")
+    #     print(f"Sorry, no place with the name '{query.title()}' could be found. Did you spell it correctly?\n")
 
-        message = 'Please re-enter the name of the place correctly or enter another place name:\n> '
+    #     message = 'Please re-enter the name of the place correctly or enter another place name:\n> '
 
-        query = input(message)
+    #     query = input(message)
 
-        params = dict(q=query.capitalize(), limit=5)
+    #     params = dict(q=query.capitalize(), limit=5)
 
-        response = requests.get(query_url, params=params).json()
-
-
-    if len(response) > 1:
-
-        print(f"There are several places with a name resembling '{query}':\n")
-
-        for i in range(len(response)):
-
-            print(f"{i+1}. {response[i]['name']} at {response[i]['lat']} and {response[i]['lon']}")
-
-        print("\n")
-
-        message = f'Which place did you mean? Type the number.\n> '
-
-        choice = int(input(message))
-
-        return response[choice-1]
+    #     response = requests.get(query_url, params=params).json()
 
 
-    return response[0]
+    # if len(response) > 1:
+
+    #     print(f"There are several places with a name resembling '{query}':\n")
+
+    #     for i in range(len(response)):
+
+    #         print(f"{i+1}. {response[i]['name']} at {response[i]['lat']} and {response[i]['lon']}")
+
+    #     print("\n")
+
+    #     message = f'Which place did you mean? Type the number.\n> '
+
+    #     choice = int(input(message))
+
+    #     return response[choice-1]
+
+
+    return response[0]['name']
 
 
 def weather_forecast(lat, lon):
@@ -92,7 +100,7 @@ def weather_forecast(lat, lon):
 def main():
     '''Ask user for a city and display weather forecast'''
     query = input("City?\n> ")
-    city = search_city(query)
+    city = search_location(query)
 
     return weather_forecast(city['lat'], city['lon'])
 

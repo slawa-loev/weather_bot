@@ -7,9 +7,10 @@ from fastapi import FastAPI #, APIRouter, BackgroundTasks
 
 # from datetime import date
 # import sys
-# import requests
+import requests
 from flask import Flask, Response, request
 import json
+from weather_api.weather_request import search_location, weather_forecast
 
 #app = FastAPI()
 
@@ -30,6 +31,16 @@ def handle_webhook(): # request
 
     # tag = req["fulfillmentInfo"]["tag"]
 
+    loc_info = req['sessionInfo']['parameters']['location']
+    loc_keys = list(loc_info.keys())
+    loc_keys.remove('original') # remove the original key, to extract relevant key
+    location_query = loc_info(loc_keys[0])
+
+    search_location(location_query)
+
+
+
+    #req['sessionInfo']['parameters']['date']
 
     # parameters = []
     # for key, value in req['sessionInfo']['parameters'].items():
@@ -44,13 +55,17 @@ def handle_webhook(): # request
 
     # You can also use the google.cloud.dialogflowcx_v3.types.WebhookRequest protos instead of manually writing the json object
     # Please see https://googleapis.dev/python/dialogflow/latest/dialogflow_v2/types.html?highlight=webhookresponse#google.cloud.dialogflow_v2.types.WebhookResponse for an overview
+
+
+
     res = {
         "fulfillment_response": {
             "messages": [
                 {
                     "text": {
                         "text": [
-                            req['sessionInfo']['parameters']['location']['original']#text
+                            search_location(location_query)
+                            #req['sessionInfo']['parameters']['location']['original']#text
                         ]
                     }
                 }
@@ -65,3 +80,26 @@ def handle_webhook(): # request
 ### Run a webhook on localhost
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=8081, debug=True)
+
+
+# if $session.params.location.city != null
+#   I gather that you want me to check the weather in $session.params.location.city on $sys.func.FORMAT_DATE($session.params.date, "EEEE, dd MMMM yyyy", "en"). Is this correct?
+# elif $session.params.location.admin-area != null
+#   I gather that you want me to check the weather in $session.params.location.admin-area on $sys.func.FORMAT_DATE($session.params.date, "EEEE, dd MMMM yyyy", "en"). Is this correct?
+# elif $session.params.location.subadmin-area != null
+#   I gather that you want me to check the weather in $session.params.location.admin-area on $sys.func.FORMAT_DATE($session.params.date, "EEEE, dd MMMM yyyy", "en"). Is this correct?
+# elif $session.params.location.country != null
+#   I gather that you want me to check the weather in $session.params.location.country on $sys.func.FORMAT_DATE($session.params.date, "EEEE, dd MMMM yyyy", "en"). Is this correct?
+# elif $session.params.location.island != null
+#   I gather that you want me to check the weather on $session.params.location.island on $sys.func.FORMAT_DATE($session.params.date, "EEEE, dd MMMM yyyy", "en"). Is this correct?
+# elif $session.params.location.business-name != null
+#   I gather that you want me to check the weather in $session.params.location.business-name at $sys.func.FORMAT_DATE($session.params.date, "EEEE, dd MMMM yyyy", "en"). Is this correct?
+# elif $session.params.location.street-address != null
+#   I gather that you want me to check the weather at $session.params.location.street-address on $sys.func.FORMAT_DATE($session.params.date, "EEEE, dd MMMM yyyy", "en"). Is this correct?
+# elif $session.params.location.zip-code != null
+#   I gather that you want me to check the weather at $session.params.location.zip-code on $sys.func.FORMAT_DATE($session.params.date, "EEEE, dd MMMM yyyy", "en"). Is this correct?
+# elif $session.params.location.shortcut != null
+#   I gather that you want me to check the weather at $session.params.location.shortcut on $sys.func.FORMAT_DATE($session.params.date, "EEEE, dd MMMM yyyy", "en"). Is this correct?
+# else
+#   I gather that you want me to check the weather in $session.params.location on $sys.func.FORMAT_DATE($session.params.date, "EEEE, dd MMMM yyyy", "en"). Is this correct?
+# endif
