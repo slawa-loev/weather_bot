@@ -3,7 +3,7 @@
 from datetime import date
 import sys
 import requests
-from params import BASE_URI, GEO, FORECAST
+#from params import BASE_URI, GEO, FORECAST
 
 #def init_info():
 
@@ -93,33 +93,24 @@ def search_location(query):
 def weather_forecast(lat, lon):
     '''Return a 5-day weather forecast for the city, given its latitude and longitude.'''
 
-    query_url = BASE_URI + FORECAST
+    forecast_url = "https://api.open-meteo.com/v1/forecast?"
+    # daily weather variables need to be appended manually to url as the comma is not parsed when constructing the URL as accepted by the API
 
-    params = dict(lat=str(lat), lon=str(lon), units='metric')
+    daily_vars = 'temperature_2m_max,temperature_2m_min'
 
-    response = requests.get(query_url, params=params).json()
+    daily = f'daily={daily_vars}'
+    forecast_url = forecast_url + daily
+    date = '2022-10-12'
+    forecast_params = dict(
+        latitude=lat,
+        longitude=lon,
+        timezone='auto',
+        start_date=date,
+        end_date=date)
 
+    response = requests.get(forecast_url, params=forecast_params).json()
 
-    forecast = []
-
-
-    for i in range(len(response["list"])):
-        if response["list"][i]["dt_txt"].split()[0] == TODAY:
-
-            continue
-
-        if response["list"][i]["dt_txt"].split()[1] == "12:00:00":
-            weather_description = str(response["list"][i]["weather"][0]["description"])
-            weather_temp = str(round(response['list'][i]['main']['temp']-273.15, 1)) + "°"
-            weather_date = str(response["list"][i]["dt_txt"].split()[0])
-            weather = weather_date + ": " + weather_description.capitalize() + " " + weather_temp
-
-
-            forecast.append({'weather': weather})
-
-    print(forecast)
-    return forecast
-
+    return response
 
 def main():
     '''Ask user for a city and display weather forecast'''

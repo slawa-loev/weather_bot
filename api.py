@@ -11,7 +11,7 @@ import requests
 from flask import Flask, Response, request
 import json
 from weather_api.weather_request import search_location, weather_forecast
-from weather_api.params import BASE_URI, GEO, FORECAST
+#from weather_api.params import BASE_URI, GEO, FORECAST
 
 
 #app = FastAPI()
