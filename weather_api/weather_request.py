@@ -11,7 +11,7 @@ def process_request(request):
     loc_info = request['sessionInfo']['parameters']['location'] # access location info in request
     loc_keys = list(loc_info.keys()) # list location keys in request
     loc_keys.remove('original') # remove the original key (e.g. "ny" or "rottrdam"), to extract relevant key resolved by dialogflow (e.g. "New York" or "Rotterdam")
-    location_query = loc_info[loc_keys[0]] # get the location name at relevant key
+    location_query = loc_info[loc_keys[0]] # get the location name at relevant key # note, sometimes there will be more than one relevant key, e.g. if there is location: city: Amsterdam, admin:North Holland
 
 
     date_raw = request['sessionInfo']['parameters']['date']
@@ -34,20 +34,20 @@ def search_location(location_name, max_locations_per_name=3):
 
     response = requests.get(geo_url, params=geo_params).json()
 
-    if response.get('results', None) == None:
+    if response.get('results', True):
         return None
 
     if len(response['results']) > 1:
 
         return [{"lat": response['results'][i]['latitude'],
           "lon": response['results'][i]['longitude'],
-          "admin1": response['results'][i]['admin1'],
-          "country": response['results'][i]['country']} for i in range(len(response['results']))]
+          "admin1": response['results'][i].get('admin1', ""),
+          "country": response['results'][i].get('country', "")} for i in range(len(response['results']))]
 
     city_info = [{"lat": response['results'][0]['latitude'],
               "lon": response['results'][0]['longitude'],
-              "admin1": response['results'][0]['admin1'],
-              "country": response['results'][0]['country']}]
+              "admin1": response['results'][0].get('admin1', ""),
+              "country": response['results'][0].get('country', "")}]
 
 
     return city_info

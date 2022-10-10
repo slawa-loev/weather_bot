@@ -51,21 +51,44 @@ def get_weather():
 
     max_locations_per_name=3
 
-    city_info = search_location(query_info['location_name'], max_locations_per_name)
+    location_info = search_location(query_info['location_name'], max_locations_per_name)
 
     ## handling for invalid or ambigious location names
 
-    if city_info == None:
+    if location_info == None:
         res['fulfillment_response']['messages'][0]['text']['text'][0] = f"Sorry, I could not find a location with the name '{query_info['location_name']}'."
         return Response(json.dumps(res), 200, mimetype='application/json')
 
-    if len(city_info) > 1:
+    if len(location_info) > 1:
         ambiguity_message = f"It looks like there are several places with the name '{query_info['location_name']}', so I went ahead and fetched information for {max_locations_per_name} of them:\n \n"
 
-        temps = [weather_forecast(city_info[i]['lat'], city_info[i]['lon'], query_info['date']) for i in range(len(city_info))]
+        temps = [weather_forecast(location_info[loc]['lat'], location_info[loc]['lon'], query_info['date']) for loc in range(len(location_info))]
 
-        city_descriptions = [f"""For {message_date}, in {query_info['location_name']}, {city_info[i]['admin1']} ({city_info[i]['country']}),
-                             the temperature {time_verb} between {temps[i]['min_temp']}°C and {temps[i]['max_temp']}°C.\n""" for i in range(len(city_info))]
+        #city_descriptions = [f"""For {message_date}, in {query_info['location_name']}, {location_info[i]['admin1']} ({location_info[i]['country']}),
+        #                     the temperature {time_verb} between {temps[i]['min_temp']}°C and {temps[i]['max_temp']}°C.\n""" for i in range(len(location_info))]
+
+        city_descriptions = [f"""For {message_date}, in {query_info['location_name']}
+                             {f" ({location_info[loc]['admin1']}, {location_info[loc]['country']}), " if location_info[loc]['admin1'] != "" else ", "}
+                             the temperature {time_verb} between {temps[loc]['min_temp']}°C and {temps[loc]['max_temp']}°C.\n""" for loc in range(len(location_info))]
+
+
+        # city_descriptions = []
+
+        # for loc in range(len(location_info)):
+
+        #     admin_description = ""
+
+
+        #     f"({location_info[loc]['admin1']}, {location_info[loc]['country']}), " if location_info[loc]['admin1'] != "" else ""
+
+        #     if location_info[loc]['admin1'] != "":
+
+        #        admin_description += f"({location_info[loc]['admin1']}, {location_info[loc]['country']}), "
+
+        #     city_descriptions.append(f"""For {message_date}, in {query_info['location_name']}, {admin_description}
+        #                              the temperature {time_verb} between {temps[i]['min_temp']}°C and {temps[i]['max_temp']}°C.\n""" for i in range(len(location_info)))
+
+
 
         message = ambiguity_message + "\n".join(city_descriptions)
 
@@ -74,9 +97,9 @@ def get_weather():
         return Response(json.dumps(res), 200, mimetype='application/json')
 
 
-    temps = weather_forecast(city_info[0]['lat'], city_info[0]['lon'], query_info['date'])
+    temps = weather_forecast(location_info[0]['lat'], location_info[0]['lon'], query_info['date'])
 
-    message = f"""For {message_date}, in {query_info['location_name']} (in {query_info['admin1']}, {query_info['country']}),
+    message = f"""For {message_date}, in {query_info['location_name']}{f" ({location_info[0]['admin1']}, {location_info[0]['country']}), " if location_info[0]['admin1'] != "" else ", "}
     the temperature {time_verb} between {temps['min_temp']}°C and temperature {temps['max_temp']}°C."""
 
     res['fulfillment_response']['messages'][0]['text']['text'][0] = message
