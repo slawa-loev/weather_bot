@@ -7,7 +7,6 @@
 
 # from datetime import date
 # import sys
-from pmdarima import c
 import requests
 from flask import Flask, Response, request
 import json
