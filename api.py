@@ -69,50 +69,52 @@ def handle_webhook(): # request
     query_info = process_request(req)
 
     message_date = query_info['date'].strftime("%A, %d %B %Y")
+    time_verb = 'is expected to be' if query_info['date'] >= today else 'was'
+    ## handling for invalid dates
 
     if query_info['date'] > today + timedelta(days=7):
-        res['fulfillment_response']['messages'][0]['text']['text'][0] = f"Sorry, {message_date}, is too far in the future. Please try with another date."
+        res['fulfillment_response']['messages'][0]['text']['text'][0] = f"Sorry, {message_date}, is too far in the future."
         return Response(json.dumps(res), 200, mimetype='application/json')
 
     if query_info['date'] < today and not query_info['date'] < today - timedelta(days=7):
-        res['fulfillment_response']['messages'][0]['text']['text'][0] = f"Sorry, {message_date}, is too recent for my records. Please try with another date."
+        res['fulfillment_response']['messages'][0]['text']['text'][0] = f"Sorry, {message_date}, is too recent for my records."
+        return Response(json.dumps(res), 200, mimetype='application/json')
+
+    max_locations_per_name=3
+
+    city_info = search_location(query_info['location_name'], max_locations_per_name)
+
+    ## handling for invalid or ambigious location names
+
+    if city_info == None:
+        res['fulfillment_response']['messages'][0]['text']['text'][0] = f"Sorry, I could not find a location with the name '{query_info['location_name']}'."
+        return Response(json.dumps(res), 200, mimetype='application/json')
+
+    if len(city_info) > 1:
+        ambiguity_message = f"It looks like there are several places with names resembling '{query_info['location_name']}', so I went ahead and fetched information for {max_locations_per_name} of them:\n \n"
+
+        temps = [weather_forecast(city_info[i]['lat'], city_info[i]['lon'], query_info['date']) for i in range(len(city_info))]
+
+        city_descriptions = [f"""For {message_date}, in {query_info['location_name']}, {city_info[i]['admin1']} ({city_info[i]['country']}),
+                             the minimum temperature {time_verb} {temps[i]['min_temp']}°C and the maximum temperature {temps[i]['max_temp']}°C""" for i in range(len(city_info))]
+
+        message = ambiguity_message + "\n".join(city_descriptions)
+
+        res['fulfillment_response']['messages'][0]['text']['text'][0] = message
+
         return Response(json.dumps(res), 200, mimetype='application/json')
 
 
-    ## implement handling for invalid dates
+    temps = weather_forecast(city_info[0]['lat'], city_info[0]['lon'], query_info['date'])
+
+    message = f"""For {message_date}, in {query_info['location_name']} (in {query_info['admin1']}, {query_info['country']}),
+    the minimum temperature {time_verb} {temps['min_temp']}°C and the maximum temperature {temps['max_temp']}°C"""
+
+    res['fulfillment_response']['messages'][0]['text']['text'][0] = message
 
 
-    coords = search_location(query_info['location_name'])
-
-    ## implement handling for ambigious names
-
-    temps = weather_forecast(coords['lat'], coords['lon'], query_info['date'])
-
-    time_verb = 'is expected to be' if query_info['date'] >= today else 'was'
-
-    res['fulfillment_response']['messages'][0]['text']['text'][0] = f"""For {message_date}, in {query_info['location_name']}, the minimum temperature {time_verb} {temps['min_temp']}°C and the maximum temperature {temps['max_temp']}°C"""
-
-    #req['sessionInfo']['parameters']['date']
-
-    # parameters = []
-    # for key, value in req['sessionInfo']['parameters'].items():
-    #      parameters.append({'name':key,'value':value})
-
-    # if tag == "Default Welcome Intent":
-    #     text = "Hello from a GCF Webhook"
-    # elif tag == "get-name":
-    #     text = "My name is Flowhook"
-    # else:
-    #     text = f"There are no fulfillment responses defined for {tag} tag"
-
-    # You can also use the google.cloud.dialogflowcx_v3.types.WebhookRequest protos instead of manually writing the json object
-    # Please see https://googleapis.dev/python/dialogflow/latest/dialogflow_v2/types.html?highlight=webhookresponse#google.cloud.dialogflow_v2.types.WebhookResponse for an overview
-
-    #{'date': {'year': 2022.0, 'month': 10.0, 'day': 10.0}, 'location': {'city': 'New York', 'original': 'ny'}}
-
-    # Returns json
     return Response(json.dumps(res), 200, mimetype='application/json')
-    #return res
+
 
 ### Run a webhook on localhost
 if __name__ == '__main__':

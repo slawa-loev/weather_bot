@@ -35,55 +35,34 @@ def process_request(request):
     return {"location_name": location_query,
             "date": date_object}
 
-def search_location(location_name):
+def search_location(location_name, max_locations_per_name=3):
     '''Look for a given location. If multiple options are returned, have the user choose between them.
        Return one city (or None)
     '''
 
-
-
     geo_url = "https://geocoding-api.open-meteo.com/v1/search"
 
-    geo_params = dict(name=location_name.capitalize(), count=1) ## looks for ambigious names
+    geo_params = dict(name=location_name.capitalize(), count=max_locations_per_name) ## looks for ambigious names
 
     response = requests.get(geo_url, params=geo_params).json()
 
-    coords = {"lat": response['results'][0]['latitude'],
-              "lon": response['results'][0]['longitude']}
+    if len(response['results']) == 0:
+        return None
 
-    # if len(response) == 0:
+    if len(response['results']) > 1:
 
-    #     print(f"Sorry, no place with the name '{query.title()}' could be found. Did you spell it correctly?\n")
+        return [{"lat": response['results'][i]['latitude'],
+          "lon": response['results'][i]['longitude'],
+          "admin1": response['results'][i]['admin1'],
+          "country": response['results'][i]['country']} for i in range(len(response['results']))]
 
-    #     message = 'Please re-enter the name of the place correctly or enter another place name:\n> '
-
-    #     query = input(message)
-
-    #     params = dict(q=query.capitalize(), limit=5)
-
-    #     response = requests.get(query_url, params=params).json()
-
-
-    # if len(response) > 1:
-
-    #     print(f"There are several places with a name resembling '{query}':\n")
-
-    #     for i in range(len(response)):
-
-    #         print(f"{i+1}. {response[i]['name']} at {response[i]['lat']} and {response[i]['lon']}")
-
-    #     print("\n")
-
-    #     message = f'Which place did you mean? Type the number.\n> '
-
-    #     choice = int(input(message))
-
-    #     return response[choice-1]
+    city_info = [{"lat": response['results'][0]['latitude'],
+              "lon": response['results'][0]['longitude'],
+              "admin1": response['results'][0]['admin1'],
+              "country": response['results'][0]['country']}]
 
 
-    #return response[0]['name']
-    #return response[0]
-    return coords
+    return city_info
 
 
 def weather_forecast(lat, lon, date):
