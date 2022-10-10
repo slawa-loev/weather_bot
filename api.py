@@ -10,7 +10,7 @@
 import requests
 from flask import Flask, Response, request
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 from weather_api.weather_request import process_request, search_location, weather_forecast
 #from weather_api.params import BASE_URI, GEO, FORECAST
 
@@ -36,6 +36,23 @@ def home():
 @app.route('/my_webhook', methods=['POST'])
 def handle_webhook(): # request
 
+    today = datetime.today().date()
+    message=""
+    res = {
+        "fulfillment_response": {
+            "messages": [
+                {
+                    "text": {
+                        "text": [
+                            message
+                        ]
+                    }
+                }
+            ]
+        }
+    }
+
+
     req = request.get_json()
 
     # tag = req["fulfillmentInfo"]["tag"]
@@ -51,13 +68,29 @@ def handle_webhook(): # request
 
     query_info = process_request(req)
 
+    message_date = query_info['date'].strftime("%A, %d %B %Y")
+
+    if query_info['date'] > today + timedelta(days=7):
+        res['fulfillment_response']['messages'][0]['text']['text'][0] = f"Sorry, {message_date}, is too far in the future. Please try with another date."
+        return Response(json.dumps(res), 200, mimetype='application/json')
+
+    if query_info['date'] < today and not query_info['date'] < today - timedelta(days=7):
+        res['fulfillment_response']['messages'][0]['text']['text'][0] = f"Sorry, {message_date}, is too recent for my records. Please try with another date."
+        return Response(json.dumps(res), 200, mimetype='application/json')
+
+
+    ## implement handling for invalid dates
+
+
     coords = search_location(query_info['location_name'])
+
+    ## implement handling for ambigious names
 
     temps = weather_forecast(coords['lat'], coords['lon'], query_info['date'])
 
-    message_date = query_info['date'].strftime("%A, %d %B %Y")
+    time_verb = 'is expected to be' if query_info['date'] >= today else 'was'
 
-    message = f"""For {message_date}, in {query_info['location_name']}, the minimum temperature is expected to be {temps['min_temp']}°C and the maximum temperature {temps['max_temp']}°C"""
+    res['fulfillment_response']['messages'][0]['text']['text'][0] = f"""For {message_date}, in {query_info['location_name']}, the minimum temperature {time_verb} {temps['min_temp']}°C and the maximum temperature {temps['max_temp']}°C"""
 
     #req['sessionInfo']['parameters']['date']
 
@@ -76,26 +109,6 @@ def handle_webhook(): # request
     # Please see https://googleapis.dev/python/dialogflow/latest/dialogflow_v2/types.html?highlight=webhookresponse#google.cloud.dialogflow_v2.types.WebhookResponse for an overview
 
     #{'date': {'year': 2022.0, 'month': 10.0, 'day': 10.0}, 'location': {'city': 'New York', 'original': 'ny'}}
-
-    res = {
-        "fulfillment_response": {
-            "messages": [
-                {
-                    "text": {
-                        "text": [
-
-
-                            #f"{req['sessionInfo']['parameters']['location'][location_query]}"
-                            #search_location(location_query)
-                            message
-                            #req['sessionInfo']['parameters']['location']['original']#text
-                            #req['session_info']['parameters']['location']['original']#text
-                        ]
-                    }
-                }
-            ]
-        }
-    }
 
     # Returns json
     return Response(json.dumps(res), 200, mimetype='application/json')
