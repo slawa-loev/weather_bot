@@ -1,30 +1,18 @@
 # pylint: disable=missing-module-docstring
 
-from datetime import datetime, timedelta
-import sys
+from datetime import datetime
 import requests
-#from params import BASE_URI, GEO, FORECAST
 
-#def init_info():
-
-# BASE_URI = "https://weather.lewagon.com"
-
-# GEO = "/geo/1.0/direct?"
-
-# FORECAST = "/data/2.5/forecast?"
-
-today = datetime.today()
-
-#https://weather.lewagon.com/geo/1.0/direct?q=Barcelona
 
 def process_request(request):
+    '''extract location name and date from request
+    '''
 
     loc_info = request['sessionInfo']['parameters']['location'] # access location info in request
     loc_keys = list(loc_info.keys()) # list location keys in request
     loc_keys.remove('original') # remove the original key (e.g. "ny" or "rottrdam"), to extract relevant key resolved by dialogflow (e.g. "New York" or "Rotterdam")
     location_query = loc_info[loc_keys[0]] # get the location name at relevant key
 
-    #location = search_location(location_query) # get coordinate of location name from weater api
 
     date_raw = request['sessionInfo']['parameters']['date']
 
@@ -36,13 +24,13 @@ def process_request(request):
             "date": date_object}
 
 def search_location(location_name, max_locations_per_name=3):
-    '''Look for a given location. If multiple options are returned, have the user choose between them.
-       Return one city (or None)
+    '''Look for a given location. If none are returned, return None.
+    If multiple are returned, return info for max_locations_per_name of them
     '''
 
     geo_url = "https://geocoding-api.open-meteo.com/v1/search"
 
-    geo_params = dict(name=location_name.capitalize(), count=max_locations_per_name) ## looks for ambigious names
+    geo_params = dict(name=location_name.capitalize(), count=max_locations_per_name)
 
     response = requests.get(geo_url, params=geo_params).json()
 
@@ -66,18 +54,15 @@ def search_location(location_name, max_locations_per_name=3):
 
 
 def weather_forecast(lat, lon, date):
-    '''Return max and min temperature for a location, given its latitude and longitude.'''
-
-#https://archive-api.open-meteo.com/v1/era5?latitude=52.52&longitude=13.41&start_date=2022-01-01&end_date=2022-01-01&daily=temperature_2m_max,temperature_2m_min&timezone=Europe%2FLondon
+    '''Return max and min temperature for a location/locations, given latitude and longitude.'''
 
     today = datetime.today().date()
 
-    url = "https://api.open-meteo.com/v1/forecast?" if date >= today else "https://archive-api.open-meteo.com/v1/era5?" # check wether requested date is in the past or future, use corresponding url
-    # for historical data there is the following contraint: Data is updated daily with a delay of 5-7 days.
+    url = "https://api.open-meteo.com/v1/forecast?" if date >= today else "https://archive-api.open-meteo.com/v1/era5?" # check whether requested date is in the past or future, use corresponding url
+    # for historical data there is the constraint that data is updated with a delay of 5-7 days.
 
     date_string = date.strftime("%Y-%m-%d")
 
-    #forecast_url = "https://api.open-meteo.com/v1/forecast?"
     # daily weather variables need to be appended manually to url as the comma is not parsed when constructing the URL as accepted by the API
 
     daily_vars = 'temperature_2m_max,temperature_2m_min'
