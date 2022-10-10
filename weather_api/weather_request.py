@@ -34,7 +34,7 @@ def search_location(location_name, max_locations_per_name=3):
 
     response = requests.get(geo_url, params=geo_params).json()
 
-    if response.get('results', True):
+    if response.get('results', None) == None:
         return None
 
     if len(response['results']) > 1:
@@ -44,13 +44,13 @@ def search_location(location_name, max_locations_per_name=3):
           "admin1": response['results'][i].get('admin1', ""),
           "country": response['results'][i].get('country', "")} for i in range(len(response['results']))]
 
-    city_info = [{"lat": response['results'][0]['latitude'],
+    location_info = [{"lat": response['results'][0]['latitude'],
               "lon": response['results'][0]['longitude'],
               "admin1": response['results'][0].get('admin1', ""),
               "country": response['results'][0].get('country', "")}]
 
 
-    return city_info
+    return location_info
 
 
 def weather_forecast(lat, lon, date):
