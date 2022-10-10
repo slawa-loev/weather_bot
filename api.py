@@ -53,7 +53,7 @@ def handle_webhook(): # request
 
     coords = search_location(query_info['location_name'])
 
-    temps = weather_forecast(coords['lat'], coords['lon'], query_info['date_string'])
+    temps = weather_forecast(coords['lat'], coords['lon'], query_info['date_string'], query_info['date_object'])
 
     message_date = query_info['date_object'].strftime("%A, %d %B %Y")
 

@@ -1,6 +1,6 @@
 # pylint: disable=missing-module-docstring
 
-from datetime import datetime
+from datetime import datetime, timedelta
 import sys
 import requests
 #from params import BASE_URI, GEO, FORECAST
@@ -13,6 +13,7 @@ import requests
 
 # FORECAST = "/data/2.5/forecast?"
 
+today = datetime.today()
 
 #https://weather.lewagon.com/geo/1.0/direct?q=Barcelona
 
@@ -29,7 +30,7 @@ def process_request(request):
 
     date_string = f"{int(date_raw['year'])}-{int(date_raw['month'])}-{int(date_raw['day'])}"
 
-    date_object = datetime.strptime(date_string, "%Y-%m-%d")
+    date_object = datetime.strptime(date_string, "%Y-%m-%d").date()
 
     return {"location_name": location_query,
             "date_string": date_string,
@@ -40,15 +41,6 @@ def search_location(location_name):
        Return one city (or None)
     '''
 
-    # BASE_URI = "https://weather.lewagon.com"
-
-    # GEO = "/geo/1.0/direct?"
-
-    # query_url = BASE_URI + GEO
-
-    # params = dict(q=query.capitalize(), limit=1)
-
-    # response = requests.get(query_url, params=params).json()
 
 
     geo_url = "https://geocoding-api.open-meteo.com/v1/search"
@@ -95,25 +87,31 @@ def search_location(location_name):
     return coords
 
 
-def weather_forecast(lat, lon, date):
+def weather_forecast(lat, lon, date_string, date_object):
     '''Return max and min temperature for a location, given its latitude and longitude.'''
 
-    forecast_url = "https://api.open-meteo.com/v1/forecast?"
+#https://archive-api.open-meteo.com/v1/era5?latitude=52.52&longitude=13.41&start_date=2022-01-01&end_date=2022-01-01&daily=temperature_2m_max,temperature_2m_min&timezone=Europe%2FLondon
+
+    today = datetime.today().date()
+
+    url = "https://api.open-meteo.com/v1/forecast?" if date_object > today else "https://archive-api.open-meteo.com/v1/era5?" # check wether requested date is in the past or future, use corresponding url
+
+    #forecast_url = "https://api.open-meteo.com/v1/forecast?"
     # daily weather variables need to be appended manually to url as the comma is not parsed when constructing the URL as accepted by the API
 
     daily_vars = 'temperature_2m_max,temperature_2m_min'
 
     daily = f'daily={daily_vars}'
-    forecast_url = forecast_url + daily
+    url = url + daily
     #date = '2022-10-12'
-    forecast_params = dict(
+    params = dict(
         latitude=lat,
         longitude=lon,
         timezone='auto',
-        start_date=date,
-        end_date=date)
+        start_date=date_string,
+        end_date=date_string)
 
-    response = requests.get(forecast_url, params=forecast_params).json()
+    response = requests.get(url, params=params).json()
 
     max_temp = response['daily']['temperature_2m_max'][0]
     min_temp = response['daily']['temperature_2m_min'][0]
