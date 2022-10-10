@@ -3,35 +3,57 @@
 from datetime import date
 import sys
 import requests
+from params import BASE_URI, GEO, FORECAST
 
 #def init_info():
 
 TODAY = str(date.today())
 
-BASE_URI = "https://weather.lewagon.com"
+# BASE_URI = "https://weather.lewagon.com"
 
-GEO = "/geo/1.0/direct?"
+# GEO = "/geo/1.0/direct?"
 
-FORECAST = "/data/2.5/forecast?"
+# FORECAST = "/data/2.5/forecast?"
 
 
 #https://weather.lewagon.com/geo/1.0/direct?q=Barcelona
+
+def process_request(request):
+
+    loc_info = request['sessionInfo']['parameters']['location'] # access location info in request
+    loc_keys = list(loc_info.keys()) # list location keys in request
+    loc_keys.remove('original') # remove the original key (e.g. "ny" or "rottrdam"), to extract relevant key resolved by dialogflow (e.g. "New York" or "Rotterdam")
+    location_query = loc_info[loc_keys[0]] # get the location name at relevant key
+
+    #location = search_location(location_query) # get coordinate of location name from weater api
+
+    date = request['sessionInfo']['parameters']['date']
+
+    return location_query, date
 
 def search_location(query):
     '''Look for a given location. If multiple options are returned, have the user choose between them.
        Return one city (or None)
     '''
 
-    BASE_URI = "https://weather.lewagon.com"
+    # BASE_URI = "https://weather.lewagon.com"
 
-    GEO = "/geo/1.0/direct?"
+    # GEO = "/geo/1.0/direct?"
 
-    query_url = BASE_URI + GEO
+    # query_url = BASE_URI + GEO
 
-    params = dict(q=query.capitalize(), limit=5)
+    # params = dict(q=query.capitalize(), limit=1)
 
-    response = requests.get(query_url, params=params).json()
+    # response = requests.get(query_url, params=params).json()
 
+
+    geo_url = "https://geocoding-api.open-meteo.com/v1/search"
+
+    geo_params = dict(name=query.capitalize(), count=1)
+
+    response = requests.get(geo_url, params=geo_params).json()
+    lat = response['results'][0]['latitude']
+    lon = response['results'][0]['longitude']
 
     # if len(response) == 0:
 
@@ -63,7 +85,9 @@ def search_location(query):
     #     return response[choice-1]
 
 
-    return response[0]['name']
+    #return response[0]['name']
+    #return response[0]
+    return lat, lon
 
 
 def weather_forecast(lat, lon):
@@ -71,7 +95,7 @@ def weather_forecast(lat, lon):
 
     query_url = BASE_URI + FORECAST
 
-    params = dict(lat=str(lat), lon=str(lon))
+    params = dict(lat=str(lat), lon=str(lon), units='metric')
 
     response = requests.get(query_url, params=params).json()
 

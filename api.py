@@ -11,8 +11,16 @@ import requests
 from flask import Flask, Response, request
 import json
 from weather_api.weather_request import search_location, weather_forecast
+from weather_api.params import BASE_URI, GEO, FORECAST
+
 
 #app = FastAPI()
+
+# BASE_URI = "https://weather.lewagon.com"
+
+# GEO = "/geo/1.0/direct?"
+
+# FORECAST = "/data/2.5/forecast?"
 
 app = Flask(__name__)
 
@@ -35,6 +43,8 @@ def handle_webhook(): # request
     loc_keys = list(loc_info.keys())
     loc_keys.remove('original') # remove the original key, to extract relevant key
     location_query = loc_info[loc_keys[0]]
+
+    #location = search_location(location_query)
 
     # search_location(location_query)
 
@@ -65,7 +75,8 @@ def handle_webhook(): # request
                     "text": {
                         "text": [
                             #f"{req['sessionInfo']['parameters']['location'][location_query]}"
-                            search_location(location_query)
+                            #search_location(location_query)
+                            f"{req['sessionInfo']['parameters']['date']}"
                             #req['sessionInfo']['parameters']['location']['original']#text
                             #req['session_info']['parameters']['location']['original']#text
                         ]
