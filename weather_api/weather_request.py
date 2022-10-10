@@ -33,8 +33,7 @@ def process_request(request):
     date_object = datetime.strptime(date_string, "%Y-%m-%d").date()
 
     return {"location_name": location_query,
-            "date_string": date_string,
-            "date_object": date_object}
+            "date": date_object}
 
 def search_location(location_name):
     '''Look for a given location. If multiple options are returned, have the user choose between them.
@@ -87,14 +86,17 @@ def search_location(location_name):
     return coords
 
 
-def weather_forecast(lat, lon, date_string, date_object):
+def weather_forecast(lat, lon, date):
     '''Return max and min temperature for a location, given its latitude and longitude.'''
 
 #https://archive-api.open-meteo.com/v1/era5?latitude=52.52&longitude=13.41&start_date=2022-01-01&end_date=2022-01-01&daily=temperature_2m_max,temperature_2m_min&timezone=Europe%2FLondon
 
     today = datetime.today().date()
 
-    url = "https://api.open-meteo.com/v1/forecast?" if date_object > today else "https://archive-api.open-meteo.com/v1/era5?" # check wether requested date is in the past or future, use corresponding url
+    url = "https://api.open-meteo.com/v1/forecast?" if date >= today else "https://archive-api.open-meteo.com/v1/era5?" # check wether requested date is in the past or future, use corresponding url
+    # for historical data there is the following contraint: Data is updated daily with a delay of 5-7 days.
+
+    date_string = date.strftime(date, "%Y-%m-%d")
 
     #forecast_url = "https://api.open-meteo.com/v1/forecast?"
     # daily weather variables need to be appended manually to url as the comma is not parsed when constructing the URL as accepted by the API
