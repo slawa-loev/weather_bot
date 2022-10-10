@@ -67,9 +67,7 @@ def get_weather():
         #city_descriptions = [f"""For {message_date}, in {query_info['location_name']}, {location_info[i]['admin1']} ({location_info[i]['country']}),
         #                     the temperature {time_verb} between {temps[i]['min_temp']}°C and {temps[i]['max_temp']}°C.\n""" for i in range(len(location_info))]
 
-        city_descriptions = [f"""For {message_date}, in {query_info['location_name']}
-                             {f" ({location_info[loc]['admin1']}, {location_info[loc]['country']}), " if location_info[loc]['admin1'] != "" else ", "}
-                             the temperature {time_verb} between {temps[loc]['min_temp']}°C and {temps[loc]['max_temp']}°C.\n""" for loc in range(len(location_info))]
+        city_descriptions = [f"""For {message_date}, in {query_info['location_name']}{f" ({location_info[loc]['admin1']}, {location_info[loc]['country']}), " if location_info[loc]['admin1'] != "" else ", "}the temperature {time_verb} between {temps[loc]['min_temp']}°C and {temps[loc]['max_temp']}°C.\n""" for loc in range(len(location_info))]
 
 
         # city_descriptions = []
@@ -99,8 +97,7 @@ def get_weather():
 
     temps = weather_forecast(location_info[0]['lat'], location_info[0]['lon'], query_info['date'])
 
-    message = f"""For {message_date}, in {query_info['location_name']}{f" ({location_info[0]['admin1']}, {location_info[0]['country']}), " if location_info[0]['admin1'] != "" else ", "}
-    the temperature {time_verb} between {temps['min_temp']}°C and temperature {temps['max_temp']}°C."""
+    message = f"""For {message_date}, in {query_info['location_name']}{f" ({location_info[0]['admin1']}, {location_info[0]['country']}), " if location_info[0]['admin1'] != "" else ", "}the temperature {time_verb} between {temps['min_temp']}°C and temperature {temps['max_temp']}°C."""
 
     res['fulfillment_response']['messages'][0]['text']['text'][0] = message
 
