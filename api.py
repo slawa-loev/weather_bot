@@ -96,7 +96,7 @@ def handle_webhook(): # request
         temps = [weather_forecast(city_info[i]['lat'], city_info[i]['lon'], query_info['date']) for i in range(len(city_info))]
 
         city_descriptions = [f"""For {message_date}, in {query_info['location_name']}, {city_info[i]['admin1']} ({city_info[i]['country']}),
-                             the minimum temperature {time_verb} {temps[i]['min_temp']}°C and the maximum temperature {temps[i]['max_temp']}°C""" for i in range(len(city_info))]
+                             the minimum temperature {time_verb} {temps[i]['min_temp']}°C and the maximum temperature {temps[i]['max_temp']}°C\n""" for i in range(len(city_info))]
 
         message = ambiguity_message + "\n".join(city_descriptions)
 
