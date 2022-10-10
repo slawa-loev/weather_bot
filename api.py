@@ -31,10 +31,10 @@ def handle_webhook(): # request
 
     # tag = req["fulfillmentInfo"]["tag"]
 
-    # loc_info = req['sessionInfo']['parameters']['location']
-    # loc_keys = list(loc_info.keys())
-    # loc_keys.remove('original') # remove the original key, to extract relevant key
-    # location_query = loc_info(loc_keys[0])
+    loc_info = req['sessionInfo']['parameters']['location']
+    loc_keys = list(loc_info.keys())
+    loc_keys.remove('original') # remove the original key, to extract relevant key
+    location_query = loc_info(loc_keys[0])
 
     # search_location(location_query)
 
@@ -56,7 +56,7 @@ def handle_webhook(): # request
     # You can also use the google.cloud.dialogflowcx_v3.types.WebhookRequest protos instead of manually writing the json object
     # Please see https://googleapis.dev/python/dialogflow/latest/dialogflow_v2/types.html?highlight=webhookresponse#google.cloud.dialogflow_v2.types.WebhookResponse for an overview
 
-
+    #{'date': {'year': 2022.0, 'month': 10.0, 'day': 10.0}, 'location': {'city': 'New York', 'original': 'ny'}}
 
     res = {
         "fulfillment_response": {
@@ -64,7 +64,7 @@ def handle_webhook(): # request
                 {
                     "text": {
                         "text": [
-                            f"{req['sessionInfo']['parameters']}"
+                            f"{req['sessionInfo']['parameters']['location'][location_query]}"
                             #search_location(location_query)
                             #req['sessionInfo']['parameters']['location']['original']#text
                             #req['session_info']['parameters']['location']['original']#text

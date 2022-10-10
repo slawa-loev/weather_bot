@@ -18,6 +18,8 @@ deploy_heroku:
 	-@heroku ps:scale web=1
 
 update_git_and_heroku:
-	-@git -commit -m "auto"
 	-@git push origin master
 	-@git push heroku master
+
+heroku_log:
+	-@heroku logs --tail
