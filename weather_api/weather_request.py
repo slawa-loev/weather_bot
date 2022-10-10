@@ -96,7 +96,7 @@ def weather_forecast(lat, lon, date):
     url = "https://api.open-meteo.com/v1/forecast?" if date >= today else "https://archive-api.open-meteo.com/v1/era5?" # check wether requested date is in the past or future, use corresponding url
     # for historical data there is the following contraint: Data is updated daily with a delay of 5-7 days.
 
-    date_string = date.strftime(date, "%Y-%m-%d")
+    date_string = date.strftime("%Y-%m-%d")
 
     #forecast_url = "https://api.open-meteo.com/v1/forecast?"
     # daily weather variables need to be appended manually to url as the comma is not parsed when constructing the URL as accepted by the API
