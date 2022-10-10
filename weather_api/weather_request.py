@@ -34,7 +34,7 @@ def search_location(location_name, max_locations_per_name=3):
 
     response = requests.get(geo_url, params=geo_params).json()
 
-    if len(response['results']) == 0:
+    if response.get('results', None) == None:
         return None
 
     if len(response['results']) > 1:
@@ -69,7 +69,6 @@ def weather_forecast(lat, lon, date):
 
     daily = f'daily={daily_vars}'
     url = url + daily
-    #date = '2022-10-12'
     params = dict(
         latitude=lat,
         longitude=lon,
