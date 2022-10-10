@@ -64,9 +64,9 @@ def handle_webhook(): # request
                 {
                     "text": {
                         "text": [
-                            #f"{req}"
+                            f"{req['sessionInfo']['parameters']}"
                             #search_location(location_query)
-                            req['sessionInfo']['parameters']['location']['original']#text
+                            #req['sessionInfo']['parameters']['location']['original']#text
                             #req['session_info']['parameters']['location']['original']#text
                         ]
                     }
