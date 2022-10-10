@@ -31,12 +31,12 @@ def handle_webhook(): # request
 
     # tag = req["fulfillmentInfo"]["tag"]
 
-    loc_info = req['sessionInfo']['parameters']['location']
-    loc_keys = list(loc_info.keys())
-    loc_keys.remove('original') # remove the original key, to extract relevant key
-    location_query = loc_info(loc_keys[0])
+    # loc_info = req['sessionInfo']['parameters']['location']
+    # loc_keys = list(loc_info.keys())
+    # loc_keys.remove('original') # remove the original key, to extract relevant key
+    # location_query = loc_info(loc_keys[0])
 
-    search_location(location_query)
+    # search_location(location_query)
 
 
 
@@ -64,9 +64,10 @@ def handle_webhook(): # request
                 {
                     "text": {
                         "text": [
-                            f"{req}"
+                            #f"{req}"
                             #search_location(location_query)
                             #req['sessionInfo']['parameters']['location']['original']#text
+                            req['session_info']['parameters']['location']['original']#text
                         ]
                     }
                 }
