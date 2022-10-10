@@ -7,10 +7,12 @@
 
 # from datetime import date
 # import sys
+from pmdarima import c
 import requests
 from flask import Flask, Response, request
 import json
-from weather_api.weather_request import search_location, weather_forecast
+from datetime import datetime
+from weather_api.weather_request import process_request, search_location, weather_forecast
 #from weather_api.params import BASE_URI, GEO, FORECAST
 
 
@@ -39,16 +41,24 @@ def handle_webhook(): # request
 
     # tag = req["fulfillmentInfo"]["tag"]
 
-    loc_info = req['sessionInfo']['parameters']['location']
-    loc_keys = list(loc_info.keys())
-    loc_keys.remove('original') # remove the original key, to extract relevant key
-    location_query = loc_info[loc_keys[0]]
+    # loc_info = req['sessionInfo']['parameters']['location']
+    # loc_keys = list(loc_info.keys())
+    # loc_keys.remove('original') # remove the original key, to extract relevant key
+    # location_query = loc_info[loc_keys[0]]
 
     #location = search_location(location_query)
 
     # search_location(location_query)
 
+    query_info = process_request(req)
 
+    coords = search_location(query_info['location_name'])
+
+    temps = weather_forecast(coords['lat'], coords['lon'], query_info['date_string'])
+
+    message_date = query_info['date_object'].strftime("%A, %d %B %Y")
+
+    message = f"""For {message_date}, in {query_info['location_name']}, the minimum temperature is expected to be {temps['min_temp']}°C and the maximum temperature {temps['max_temp']}°C"""
 
     #req['sessionInfo']['parameters']['date']
 
@@ -74,9 +84,11 @@ def handle_webhook(): # request
                 {
                     "text": {
                         "text": [
+
+
                             #f"{req['sessionInfo']['parameters']['location'][location_query]}"
                             #search_location(location_query)
-                            f"{req['sessionInfo']['parameters']['date']}"
+                            message
                             #req['sessionInfo']['parameters']['location']['original']#text
                             #req['session_info']['parameters']['location']['original']#text
                         ]

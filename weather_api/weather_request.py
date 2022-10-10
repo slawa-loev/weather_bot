@@ -1,13 +1,11 @@
 # pylint: disable=missing-module-docstring
 
-from datetime import date
+from datetime import datetime
 import sys
 import requests
 #from params import BASE_URI, GEO, FORECAST
 
 #def init_info():
-
-TODAY = str(date.today())
 
 # BASE_URI = "https://weather.lewagon.com"
 
@@ -27,11 +25,17 @@ def process_request(request):
 
     #location = search_location(location_query) # get coordinate of location name from weater api
 
-    date = request['sessionInfo']['parameters']['date']
+    date_raw = request['sessionInfo']['parameters']['date']
 
-    return location_query, date
+    date_string = f"{int(date_raw['year'])}-{int(date_raw['month'])}-{int(date_raw['day'])}"
 
-def search_location(query):
+    date_object = datetime.strptime(date_string, "%Y-%m-%d")
+
+    return {"location_name": location_query,
+            "date_string": date_string,
+            "date_object": date_object}
+
+def search_location(location_name):
     '''Look for a given location. If multiple options are returned, have the user choose between them.
        Return one city (or None)
     '''
@@ -49,11 +53,12 @@ def search_location(query):
 
     geo_url = "https://geocoding-api.open-meteo.com/v1/search"
 
-    geo_params = dict(name=query.capitalize(), count=1)
+    geo_params = dict(name=location_name.capitalize(), count=1) ## looks for ambigious names
 
     response = requests.get(geo_url, params=geo_params).json()
-    lat = response['results'][0]['latitude']
-    lon = response['results'][0]['longitude']
+
+    coords = {"latitude": response['results'][0]['latitude'],
+              "longitude": response['results'][0]['longitude']}
 
     # if len(response) == 0:
 
@@ -87,11 +92,11 @@ def search_location(query):
 
     #return response[0]['name']
     #return response[0]
-    return lat, lon
+    return coords
 
 
-def weather_forecast(lat, lon):
-    '''Return a 5-day weather forecast for the city, given its latitude and longitude.'''
+def weather_forecast(lat, lon, date):
+    '''Return max and min temperature for a location, given its latitude and longitude.'''
 
     forecast_url = "https://api.open-meteo.com/v1/forecast?"
     # daily weather variables need to be appended manually to url as the comma is not parsed when constructing the URL as accepted by the API
@@ -100,7 +105,7 @@ def weather_forecast(lat, lon):
 
     daily = f'daily={daily_vars}'
     forecast_url = forecast_url + daily
-    date = '2022-10-12'
+    #date = '2022-10-12'
     forecast_params = dict(
         latitude=lat,
         longitude=lon,
@@ -110,19 +115,9 @@ def weather_forecast(lat, lon):
 
     response = requests.get(forecast_url, params=forecast_params).json()
 
-    return response
+    max_temp = response['daily']['temperature_2m_max'][0]
+    min_temp = response['daily']['temperature_2m_min'][0]
 
-def main():
-    '''Ask user for a city and display weather forecast'''
-    query = input("City?\n> ")
-    city = search_location(query)
 
-    return weather_forecast(city['lat'], city['lon'])
-
-if __name__ == '__main__':
-    try:
-        while True:
-            main()
-    except KeyboardInterrupt:
-        print('\nGoodbye!')
-        sys.exit(0)
+    return {"max_temp": max_temp,
+            "min_temp": min_temp}
