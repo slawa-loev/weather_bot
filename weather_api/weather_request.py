@@ -57,8 +57,8 @@ def search_location(location_name):
 
     response = requests.get(geo_url, params=geo_params).json()
 
-    coords = {"latitude": response['results'][0]['latitude'],
-              "longitude": response['results'][0]['longitude']}
+    coords = {"lat": response['results'][0]['latitude'],
+              "lon": response['results'][0]['longitude']}
 
     # if len(response) == 0:
 
