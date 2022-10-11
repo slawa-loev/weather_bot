@@ -1,5 +1,3 @@
-# pylint: disable=missing-module-docstring
-
 from datetime import datetime
 import requests
 
@@ -24,8 +22,8 @@ def process_request(request):
             "date": date_object}
 
 def search_location(location_name, max_locations_per_name=3):
-    '''Look for a given location. If none are returned, return None.
-    If multiple are returned, return info for max_locations_per_name of them
+    '''Look for geo info of a given location. If none are returned, return None.
+    If multiple are returned, return info for max_locations_per_name of them. Otherwise return geo info for the unique location.
     '''
 
     geo_url = "https://geocoding-api.open-meteo.com/v1/search"
