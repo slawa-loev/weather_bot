@@ -1,10 +1,9 @@
 
-#import requests
+import requests
 from flask import Flask, Response, request
 import json
 from datetime import datetime, timedelta
 from weather_api.weather_request import process_request, search_location, weather_forecast
-
 
 app = Flask(__name__)
 
@@ -33,6 +32,18 @@ def get_weather():
 
 
     req = request.get_json()
+
+    #https://v2.jokeapi.dev/joke/Any?blacklistFlags=nsfw,religious,political,racist,sexist,explicit&type=single
+
+    tag = req["fulfillmentInfo"]["tag"]
+
+    if tag == "get_joke":
+
+        joke = requests.get('https://v2.jokeapi.dev/joke/Any?blacklistFlags=nsfw,religious,political,racist,sexist,explicit&type=single').json()["joke"]
+        res['fulfillment_response']['messages'][0]['text']['text'][0] = joke
+        return Response(json.dumps(res), 200, mimetype='application/json')
+
+
 
     query_info = process_request(req)
 
@@ -64,28 +75,7 @@ def get_weather():
 
         temps = [weather_forecast(location_info[loc]['lat'], location_info[loc]['lon'], query_info['date']) for loc in range(len(location_info))]
 
-        #city_descriptions = [f"""For {message_date}, in {query_info['location_name']}, {location_info[i]['admin1']} ({location_info[i]['country']}),
-        #                     the temperature {time_verb} between {temps[i]['min_temp']}°C and {temps[i]['max_temp']}°C.\n""" for i in range(len(location_info))]
-
         city_descriptions = [f"""For {message_date}, in {query_info['location_name']}{f" ({location_info[loc]['admin1']}, {location_info[loc]['country']}), " if location_info[loc]['admin1'] != "" else ", "}the temperature {time_verb} between {temps[loc]['min_temp']}°C and {temps[loc]['max_temp']}°C.\n""" for loc in range(len(location_info))]
-
-
-        # city_descriptions = []
-
-        # for loc in range(len(location_info)):
-
-        #     admin_description = ""
-
-
-        #     f"({location_info[loc]['admin1']}, {location_info[loc]['country']}), " if location_info[loc]['admin1'] != "" else ""
-
-        #     if location_info[loc]['admin1'] != "":
-
-        #        admin_description += f"({location_info[loc]['admin1']}, {location_info[loc]['country']}), "
-
-        #     city_descriptions.append(f"""For {message_date}, in {query_info['location_name']}, {admin_description}
-        #                              the temperature {time_verb} between {temps[i]['min_temp']}°C and {temps[i]['max_temp']}°C.\n""" for i in range(len(location_info)))
-
 
 
         message = ambiguity_message + "\n".join(city_descriptions)
