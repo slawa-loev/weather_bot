@@ -65,7 +65,7 @@ def get_weather():
         return Response(json.dumps(res), 200, mimetype='application/json')
 
     if len(location_info) > 1: # handles requests for multiple location with the same name
-        ambiguity_message = f"It looks like there are several places with the name '{query_info['location_name']}', so I went ahead and fetched information for {max_locations_per_name} of them:\n \n"
+        ambiguity_message = f"It looks like there are several places with the name '{query_info['location_name']}', so I went ahead and fetched information for {len(location_info)} of them:\n \n"
 
         temps = [weather_forecast(location_info[loc]['lat'], location_info[loc]['lon'], query_info['date']) for loc in range(len(location_info))]
 
