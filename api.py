@@ -35,7 +35,20 @@ def get_weather():
 
     if tag == "get_joke": # if tag comes from joke flow, we return a joke
 
-        joke = requests.get('https://v2.jokeapi.dev/joke/Any?blacklistFlags=nsfw,religious,political,racist,sexist,explicit&type=single').json()["joke"]
+        response = requests.get('https://v2.jokeapi.dev/joke/Any?blacklistFlags=nsfw,religious,political,racist,sexist,explicit&type=single')
+
+        if response.status_code != 200:
+
+            res['fulfillment_response']['messages'][0]['text']['text'][0] ="""Oops, something went wrong with my muse. Here's one from memory:
+
+            A pair of cows were talking in the field. One says, "Have you heard about the mad cow disease that's going around?"
+
+            "Yeah," the other cow says. "Makes me glad I'm a penguin."
+            """
+
+            return Response(json.dumps(res), 200, mimetype='application/json')
+
+        joke = response.json()["joke"]
         res['fulfillment_response']['messages'][0]['text']['text'][0] = joke
         return Response(json.dumps(res), 200, mimetype='application/json')
 
@@ -57,6 +70,10 @@ def get_weather():
     max_locations_per_name=3 # sets a parameter for how many cities with the same name to get from the geo weather api
 
     location_info = search_location(query_info['location_name'], max_locations_per_name) # getting location info based on the name
+
+    if location_info == "api_error":
+        res['fulfillment_response']['messages'][0]['text']['text'][0] = "Sorry, my weather crystal ball seems out of order today."
+        return Response(json.dumps(res), 200, mimetype='application/json')
 
     ## handling for invalid or ambigious location names
 
@@ -80,6 +97,10 @@ def get_weather():
     # handles requests for exactly one location with the name
 
     temps = weather_forecast(location_info[0]['lat'], location_info[0]['lon'], query_info['date'])
+
+    if temps == "api_error":
+        res['fulfillment_response']['messages'][0]['text']['text'][0] = "Sorry, my weather crystal ball seems out of order today."
+        return Response(json.dumps(res), 200, mimetype='application/json')
 
     message = f"""For {message_date}, in {query_info['location_name']}{f" ({location_info[0]['admin1']}, {location_info[0]['country']}), " if location_info[0]['admin1'] != "" else ", "}the temperature {time_verb} between {temps['min_temp']}°C and temperature {temps['max_temp']}°C."""
 

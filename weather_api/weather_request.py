@@ -30,22 +30,27 @@ def search_location(location_name, max_locations_per_name=3):
 
     geo_params = dict(name=location_name.capitalize(), count=max_locations_per_name)
 
-    response = requests.get(geo_url, params=geo_params).json()
+    response = requests.get(geo_url, params=geo_params)
 
-    if response.get('results', None) == None:
+    if response.status_code != 200:
+        return "api_error"
+
+    response_json = response.json()
+
+    if response_json.get('results', None) == None:
         return None
 
-    if len(response['results']) > 1:
+    if len(response_json['results']) > 1:
 
-        return [{"lat": response['results'][i]['latitude'],
-          "lon": response['results'][i]['longitude'],
-          "admin1": response['results'][i].get('admin1', ""),
-          "country": response['results'][i].get('country', "")} for i in range(len(response['results']))]
+        return [{"lat": response_json['results'][i]['latitude'],
+          "lon": response_json['results'][i]['longitude'],
+          "admin1": response_json['results'][i].get('admin1', ""),
+          "country": response_json['results'][i].get('country', "")} for i in range(len(response_json['results']))]
 
-    location_info = [{"lat": response['results'][0]['latitude'],
-              "lon": response['results'][0]['longitude'],
-              "admin1": response['results'][0].get('admin1', ""),
-              "country": response['results'][0].get('country', "")}]
+    location_info = [{"lat": response_json['results'][0]['latitude'],
+              "lon": response_json['results'][0]['longitude'],
+              "admin1": response_json['results'][0].get('admin1', ""),
+              "country": response_json['results'][0].get('country', "")}]
 
 
     return location_info
@@ -74,10 +79,15 @@ def weather_forecast(lat, lon, date):
         start_date=date_string,
         end_date=date_string)
 
-    response = requests.get(url, params=params).json()
+    response = requests.get(url, params=params)
 
-    max_temp = response['daily']['temperature_2m_max'][0]
-    min_temp = response['daily']['temperature_2m_min'][0]
+    if response.status_code != 200:
+        return "api_error"
+
+    response_json = response.json()
+
+    max_temp = response_json['daily']['temperature_2m_max'][0]
+    min_temp = response_json['daily']['temperature_2m_min'][0]
 
 
     return {"max_temp": max_temp,
